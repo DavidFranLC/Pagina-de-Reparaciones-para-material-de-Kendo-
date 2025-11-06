@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Iniciar sesión{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-form">
+        <h2 style="text-align: center;">Iniciar sesión</h2>
+        <form method="POST" action="{{ url_for('login') }}">
+            <input type="email" name="correo" placeholder="Correo electrónico" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <p style="text-align: center;" >¿No tienes cuenta? <a href="{{ url_for('register') }}">Regístrate aquí</a></p>
+
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 🔹 Sección educativa -->
+<section class="kendo-info">
+    <h2 style="text-align: center;">¿Qué es el Kendo?</h2>
+    <p>
+        El <strong>Kendo</strong> es un arte marcial japonés que significa “el camino del sable”.
+        Su práctica busca el perfeccionamiento del carácter a través del entrenamiento con espadas
+        de bambú llamadas <em>shinai</em> y la armadura de protección llamada <em>bōgu</em>.
+    </p>
+
+    <div class="kendo-sections">
+        <div class="info-card">
+            <h3 style="text-align: center;"> Partes de la Armadura (Bōgu)</h3>
+            <ul>
+                <li><strong>Men:</strong> Casco que protege la cabeza y el rostro.</li>
+                <li><strong>Kote:</strong> Guantes que protegen las manos y muñecas.</li>
+                <li><strong>Dō:</strong> Protector del torso.</li>
+                <li><strong>Tare:</strong> Protector de la cintura y las caderas.</li>
+            </ul>
+            <img src="{{ url_for('static', filename='img/bogu.png') }}" alt="Bōgu (armadura de Kendo)">
+        </div>
+
+        <div class="info-card">
+            <h3> Tipos de Espada</h3>
+            <ul>
+                <li><strong>Shinai:</strong> Espada de bambú usada para la práctica y combate.</li>
+                <li><strong>Bokken:</strong> Espada de madera utilizada en ejercicios técnicos.</li>
+                <li><strong>Katana:</strong> Espada tradicional japonesa de filo real.</li>
+            </ul>
+            <img src="{{ url_for('static', filename='img/swords.png') }}" alt="Espadas de Kendo">
+        </div>
+    </div>
+</section>
+{% endblock %}
+

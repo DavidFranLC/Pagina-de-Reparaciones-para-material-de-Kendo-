@@ -1,0 +1,105 @@
+/* 🔹 Contenedor principal del login */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+
+}
+.titulo-japones {
+  text-align: center;              /* Centra el título */
+  font-size: 2.5rem;               /* Aumenta el tamaño del texto */
+  letter-spacing: 3px;             /* Espaciado entre letras */
+  margin-top: 30px;                /* Separación superior */
+  margin-bottom: 30px;             /* Separación inferior */
+  color: #2c2c2c;                  /* Color oscuro tipo tinta */
+  font-family: 'Noto Serif JP', serif; /* Fuente japonesa elegante */
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.3); /* Le da una sombra suave */
+}
+
+
+.login-form {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    width: 350px;
+    text-align: center;
+}
+
+.login-form h2 {
+    color: #003366;
+    margin-bottom: 20px;
+}
+
+.login-form input {
+    width: 90%;
+    padding: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.login-form button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-form button:hover {
+    background-color: #0056b3;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}
+
+/* 🔹 Sección educativa */
+.kendo-info {
+    background: #f4faff;
+    margin-top: 40px;
+    padding: 40px 10%;
+    text-align: center;
+}
+
+.kendo-info h2 {
+    color: #002b5b;
+    margin-bottom: 15px;
+}
+
+.kendo-info p {
+    max-width: 800px;
+    margin: 0 auto 30px auto;
+    line-height: 1.6;
+}
+
+.kendo-sections {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+}
+
+.info-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 320px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.info-card h3 {
+    color: #003366;
+    margin-bottom: 10px;
+}
+
+.info-card img {
+    width: 100%;
+    border-radius: 10px;
+    margin-top: 10px;
+}
