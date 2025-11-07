@@ -5,7 +5,7 @@ import os
 import sys
 import traceback
 
-# --- 🔧 Solución al problema de imports relativos ---
+# ---  Solución al problema de imports relativos ---
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database.db_connection import get_db_connection
@@ -240,13 +240,5 @@ def handler(event, context):
     return handle_request(app, event, context)
 
 
-# ----------------------------------------
-# 🔹 Ejecución local
-# ----------------------------------------
-    
-if __name__ == "__main__":
-    try:
-        app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
-    except Exception:
-        traceback.print_exc(file=sys.stdout)
+
 
