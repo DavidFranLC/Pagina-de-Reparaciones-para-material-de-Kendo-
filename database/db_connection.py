@@ -11,13 +11,11 @@ def get_db_connection():
             database=os.getenv("DB_NAME"),
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
-            port=os.getenv("DB_PORT", 5432),
-            sslmode="require"
+            port=os.getenv("DB_PORT", 5432)
         )
-        print(" Conexión a la base de datos establecida correctamente.")
+        print(" Conexión exitosa a la base de datos")
         return connection
     except Exception as e:
-        print(" Error al conectar a la base de datos:", e)
-        raise e
-
+        print(" Error de conexión a la base de datos:", e)
+        raise
 
