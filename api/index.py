@@ -220,9 +220,11 @@ def logout():
 # ----------------------------------------
 # 🔹 Configuración para Vercel
 # ----------------------------------------
+from serverless_wsgi import handle_request
+
 def handler(event, context):
     """Compatibilidad con Vercel"""
-    return app(event, context)
+    return handle_request(app, event, context)
 
 
 # ----------------------------------------
