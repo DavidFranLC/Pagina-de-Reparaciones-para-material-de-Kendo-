@@ -2,9 +2,13 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
-from database.db_connection import get_db_connection
 import sys
 import traceback
+
+# --- 🔧 Solución al problema de imports relativos ---
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from database.db_connection import get_db_connection
 
 
 # Crear la app Flask
