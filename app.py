@@ -1,24 +1,28 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from database.db_connection import get_db_connection
 from datetime import datetime
+import os
+from database.db_connection import get_db_connection
 
+# Crear la app Flask
 app = Flask(__name__)
-app.secret_key = 'clave_secreta_super_segura'
-
+app.secret_key = os.environ.get("SECRET_KEY", "clave_secreta_super_segura")
 
 # ----------------------------------------
 # 🔹 Registrar actividad
 # ----------------------------------------
 def registrar_actividad(usuario_id, accion):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO actividad (usuario_id, accion, fecha) VALUES (%s, %s, %s)",
-        (usuario_id, accion, datetime.now())
-    )
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO actividad (usuario_id, accion, fecha) VALUES (%s, %s, %s)",
+            (usuario_id, accion, datetime.now())
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"⚠️ Error al registrar actividad: {e}")
 
 
 # ----------------------------------------
@@ -41,7 +45,7 @@ def register():
         sensei = request.form['sensei']
         rango = request.form['rango']
         correo = request.form['correo']
-        password = request.form['password']  
+        password = request.form['password']
 
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -72,7 +76,7 @@ def login():
         conn.close()
 
         if user:
-            if user['password'] == password:  # sin hash
+            if user['password'] == password:
                 session['usuario'] = user
                 registrar_actividad(user['id_usuario'], 'Inicio sesión')
                 if user['rol'] == 'admin':
@@ -96,15 +100,14 @@ def cliente_dashboard():
         return redirect(url_for('index'))
 
     usuario_id = session['usuario']['id_usuario']
-
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
-    SELECT id_solicitud, articulo, descripcion, estado, fecha
-    FROM solicitudes
-    WHERE id_usuario = %s
-    ORDER BY fecha DESC
-""", (usuario_id,))
+        SELECT id_solicitud, articulo, descripcion, estado, fecha
+        FROM solicitudes
+        WHERE id_usuario = %s
+        ORDER BY fecha DESC
+    """, (usuario_id,))
     solicitudes = cursor.fetchall()
     conn.close()
 
@@ -126,7 +129,6 @@ def admin_dashboard():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # 🔸 Solicitudes recientes
     cursor.execute("""
         SELECT s.id_solicitud, s.articulo, s.descripcion, s.estado, s.fecha, u.nombre AS cliente
         FROM solicitudes s
@@ -135,7 +137,6 @@ def admin_dashboard():
     """)
     solicitudes = cursor.fetchall()
 
-    # 🔸 Actividades recientes
     cursor.execute("""
         SELECT a.id, a.accion, a.fecha, u.nombre AS usuario
         FROM actividad a
@@ -143,19 +144,14 @@ def admin_dashboard():
         ORDER BY a.fecha DESC
     """)
     actividades = cursor.fetchall()
-
     conn.close()
 
-    # Registrar acción del admin
     registrar_actividad(session['usuario']['id_usuario'], "Ingresó al panel de administrador")
 
-    return render_template(
-        'admin_dashboard.html',
-        usuario=session['usuario'],
-        solicitudes=solicitudes,
-        actividades=actividades
-    )
-
+    return render_template('admin_dashboard.html',
+                           usuario=session['usuario'],
+                           solicitudes=solicitudes,
+                           actividades=actividades)
 
 
 # ----------------------------------------
@@ -219,7 +215,15 @@ def logout():
 
 
 # ----------------------------------------
-# 🔹 Ejecutar la app
+# 🔹 Configuración para Vercel
 # ----------------------------------------
-if __name__ == '__main__':
-    app.run(debug=True)
+def handler(event, context):
+    """Compatibilidad con Vercel"""
+    return app(event, context)
+
+
+# ----------------------------------------
+# 🔹 Ejecución local
+# ----------------------------------------
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
