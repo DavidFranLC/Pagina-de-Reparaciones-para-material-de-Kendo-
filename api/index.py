@@ -1,19 +1,30 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-import os
-import sys
-import traceback
-
-# ---  Solución al problema de imports relativos ---
+import os, sys, logging
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from database.db_connection import get_db_connection
+from serverless_wsgi import handle_request
 
+# --- Ajuste de imports relativos ---
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Crear la app Flask
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "clave_secreta_super_segura")
+
+# ----------------------------------------
+# 🔹 Probar conexión a la base de datos
+# ----------------------------------------
+@app.route('/test_db')
+def test_db():
+    try:
+        conn = get_db_connection()
+        conn.close()
+        return jsonify({"message": "✅ Conexión exitosa a la base de datos"})
+    except Exception as e:
+        print("❌ ERROR AL CONECTAR A LA BD:", e)
+        return jsonify({"error": str(e)}), 500
 
 # ----------------------------------------
 # 🔹 Registrar actividad
@@ -31,14 +42,12 @@ def registrar_actividad(usuario_id, accion):
     except Exception as e:
         print(f"⚠️ Error al registrar actividad: {e}")
 
-
 # ----------------------------------------
 # 🔹 Página principal (login)
 # ----------------------------------------
 @app.route('/')
 def index():
     return render_template('login.html')
-
 
 # ----------------------------------------
 # 🔹 Registro de usuarios
@@ -65,7 +74,6 @@ def register():
         return redirect(url_for('index'))
     
     return render_template('register.html')
-
 
 # ----------------------------------------
 # 🔹 Inicio de sesión
@@ -97,7 +105,6 @@ def login():
 
     return render_template('login.html')
 
-
 # ----------------------------------------
 # 🔹 Dashboard del cliente
 # ----------------------------------------
@@ -123,7 +130,6 @@ def cliente_dashboard():
     return render_template('cliente_dashboard.html',
                            usuario=session['usuario'],
                            solicitudes=solicitudes)
-
 
 # ----------------------------------------
 # 🔹 Dashboard del administrador 
@@ -160,7 +166,6 @@ def admin_dashboard():
                            solicitudes=solicitudes,
                            actividades=actividades)
 
-
 # ----------------------------------------
 # 🔹 Actualizar estado de solicitudes
 # ----------------------------------------
@@ -182,7 +187,6 @@ def actualizar_estado(id_solicitud):
                         f"Actualizó estado de solicitud #{id_solicitud} a '{nuevo_estado}'")
 
     return redirect(url_for('admin_dashboard'))
-
 
 # ----------------------------------------
 # 🔹 Enviar solicitud de reparación (cliente)
@@ -209,7 +213,6 @@ def enviar_solicitud():
 
     return redirect(url_for('cliente_dashboard'))
 
-
 # ----------------------------------------
 # 🔹 Cerrar sesión
 # ----------------------------------------
@@ -220,25 +223,21 @@ def logout():
         session.clear()
     return redirect(url_for('index'))
 
-
-import logging
-
-# Manejo de errores global para ver detalles en los logs
+# ----------------------------------------
+# 🔹 Manejo de errores global
+# ----------------------------------------
 @app.errorhandler(Exception)
 def handle_exception(e):
     logging.exception("❌ Error interno en la aplicación Flask:")
     return "Internal Server Error", 500
 
-
 # ----------------------------------------
 # 🔹 Configuración para Vercel
 # ----------------------------------------
-from serverless_wsgi import handle_request
-
 def handler(event, context):
     """Compatibilidad con Vercel"""
     return handle_request(app, event, context)
 
-
-
+if __name__ == '__main__':
+    app.run(debug=True)
 
