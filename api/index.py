@@ -217,6 +217,15 @@ def logout():
     return redirect(url_for('index'))
 
 
+import logging
+
+# Manejo de errores global para ver detalles en los logs
+@app.errorhandler(Exception)
+def handle_exception(e):
+    logging.exception("❌ Error interno en la aplicación Flask:")
+    return "Internal Server Error", 500
+
+
 # ----------------------------------------
 # 🔹 Configuración para Vercel
 # ----------------------------------------
