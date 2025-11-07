@@ -3,6 +3,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
 from database.db_connection import get_db_connection
+import sys
+import traceback
+
 
 # Crear la app Flask
 app = Flask(__name__)
@@ -225,5 +228,10 @@ def handler(event, context):
 # ----------------------------------------
 # 🔹 Ejecución local
 # ----------------------------------------
+    
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    try:
+        app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+    except Exception:
+        traceback.print_exc(file=sys.stdout)
+
