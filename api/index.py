@@ -10,8 +10,13 @@ from serverless_wsgi import handle_request
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Crear la app Flask
-app = Flask(__name__)
+# Configurar rutas para templates y archivos estáticos (están en la raíz del proyecto)
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+app = Flask(__name__, 
+            template_folder=os.path.join(base_dir, 'templates'),
+            static_folder=os.path.join(base_dir, 'static'))
 app.secret_key = os.environ.get("SECRET_KEY", "clave_secreta_super_segura")
+
 
 # ----------------------------------------
 # 🔹 Probar conexión a la base de datos
@@ -84,24 +89,31 @@ def login():
         correo = request.form.get('correo')
         password = request.form.get('password')
 
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM usuarios WHERE correo=%s", (correo,))
-        user = cursor.fetchone()
-        conn.close()
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM usuarios WHERE correo=%s", (correo,))
+            user = cursor.fetchone()
+            conn.close()
 
-        if user:
-            if user['password'] == password:
-                session['usuario'] = user
-                registrar_actividad(user['id_usuario'], 'Inicio sesión')
-                if user['rol'] == 'admin':
-                    return redirect(url_for('admin_dashboard'))
+            if user:
+                if user['password'] == password:
+                    session['usuario'] = user
+                    registrar_actividad(user['id_usuario'], 'Inicio sesión')
+                    if user['rol'] == 'admin':
+                        return redirect(url_for('admin_dashboard'))
+                    else:
+                        return redirect(url_for('cliente_dashboard'))
                 else:
-                    return redirect(url_for('cliente_dashboard'))
+                    return render_template('login.html', error="Correo o contraseña incorrectos")
             else:
                 return render_template('login.html', error="Correo o contraseña incorrectos")
-        else:
-            return render_template('login.html', error="Correo o contraseña incorrectos")
+        except Exception as e:
+            # Manejar errores de conexión a la base de datos
+            error_msg = "Error de conexión a la base de datos. Por favor, verifica tu conexión a internet y la configuración."
+            if app.debug:
+                error_msg += f" Detalles: {str(e)}"
+            return render_template('login.html', error=error_msg)
 
     return render_template('login.html')
 
@@ -229,6 +241,10 @@ def logout():
 @app.errorhandler(Exception)
 def handle_exception(e):
     logging.exception("❌ Error interno en la aplicación Flask:")
+    # En modo debug, mostrar más información del error
+    if app.debug:
+        import traceback
+        return f"<h1>Internal Server Error</h1><pre>{traceback.format_exc()}</pre>", 500
     return "Internal Server Error", 500
 
 # ----------------------------------------
